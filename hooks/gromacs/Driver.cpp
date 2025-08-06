@@ -22,36 +22,86 @@
 #include "GromacsHook.h"
 #include "ResourceHandler.h"
 #include "json/json.h"
-#include "gmxpre.h"
-#include "gromacs/commandline/cmdlinemodulemanager.h"
-#include "programs/mdrun/mdrun_main.h"
 #include <sstream>
 
-// Starting in version 2019, gmx_mdrun is now in the gmx namespace.
-// This allows us to call either &gmx_mdrun or &gmx::gmx_mdrun, depending on version.
-using namespace gmx;
+// Since SSAGES is now specifically configured to build against GROMACS 2024.4,
+// we'll use the modern gmxapi exclusively
+#define USE_MODERN_GROMACS_API
+#include "gmxapi/gmxapi.h"
+#include "gmxapi/context.h"
+#include "gmxapi/session.h"
+#include "gmxapi/md.h"
+#include "gmxapi/system.h"
 
 namespace SSAGES
 {
 	void Driver::Run()
 	{
-		int argc = args_.size() + 1 + ((rh_->GetNumWalkers() > 1) ? 2 : 0);
-		char **argv = new char*[argc];
-		for(int i = 0; i < argc; ++i)
-			argv[i] = new char[128];
-		
-		sprintf(argv[0], "ssages");
-		for(size_t i = 0; i < args_.size(); ++i)
-			strcpy(argv[i+1], args_[i].c_str());
-		
-		if(rh_->GetNumWalkers() > 1)
-		{
-			sprintf(argv[args_.size()+1], "-multi");
-			sprintf(argv[args_.size()+2], "%i", static_cast<int>(rh_->GetNumWalkers()));
-		}
+		// Handle different GROMACS API versions
+#ifdef USE_MODERN_GROMACS_API
+        // Modern GROMACS API (2024+) using gmxapi
+        try {
+            // Extract TPR filename from arguments (typically -s argument)
+            std::string tprFilename;
+            for(size_t i = 0; i < args_.size(); ++i) {
+                if(args_[i] == "-s" && i + 1 < args_.size()) {
+                    tprFilename = args_[i + 1];
+                    break;
+                }
+            }
+            
+            if(tprFilename.empty()) {
+                throw std::runtime_error("No TPR file specified in arguments. Modern GROMACS API requires a TPR file (-s option).");
+            }
+            
+            std::cout << "Using TPR file: " << tprFilename << std::endl;
+            
+            // Create a GROMACS system from TPR file
+            auto system = gmxapi::fromTprFile(tprFilename);
+            
+            // Create a GROMACS execution context as shared_ptr
+            auto context = std::make_shared<gmxapi::Context>(gmxapi::createContext());
+            
+            // Launch the system to create a session
+            auto session = system.launch(context);
+            
+            // Run the simulation
+            session->run();
+            session->close();
+            
+            std::cout << "GROMACS simulation completed successfully." << std::endl;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error in modern GROMACS API: " << e.what() << std::endl;
+            throw;
+        }
+#else
+        // Legacy GROMACS API - build argc/argv like before
+        int argc = args_.size() + 1 + ((rh_->GetNumWalkers() > 1) ? 2 : 0);
+        char **argv = new char*[argc];
+        for(int i = 0; i < argc; ++i)
+            argv[i] = new char[128];
+        
+        sprintf(argv[0], "ssages");
+        for(size_t i = 0; i < args_.size(); ++i)
+            strcpy(argv[i+1], args_[i].c_str());
+        
+        if(rh_->GetNumWalkers() > 1)
+        {
+            sprintf(argv[args_.size()+1], "-multi");
+            sprintf(argv[args_.size()+2], "%i", static_cast<int>(rh_->GetNumWalkers()));
+        }
 
-		std::cout << std::endl;
-		CommandLineModuleManager::runAsMainCMain(argc, argv, &gmx_mdrun);
+        std::cout << std::endl;
+        
+        // Use legacy CommandLineModuleManager
+        CommandLineModuleManager::runAsMainCMain(argc, argv, &gmx_mdrun);
+        
+        // Clean up
+        for(int i = 0; i < argc; ++i)
+            delete[] argv[i];
+        delete[] argv;
+#endif
 	}
 	
 	Driver* Driver::Build(const Json::Value& json, const MPI_Comm& world)
