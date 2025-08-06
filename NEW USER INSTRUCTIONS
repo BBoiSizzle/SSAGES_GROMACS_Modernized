@@ -1,0 +1,24 @@
+Complete Process for New Users
+
+  A new user needs to do these steps:
+
+  1. If patching to a current build, ensure GROMACS is already installed. If not, change the make command in step 4 from -DGROMACS_ROOT=/path/to/gromacs to -DGROMACS=2024.4 or whichever version you want. 
+
+  2. Get SSAGES Source Code (if they don't have it)
+
+  git clone https://github.com/SSAGESproject/SSAGES.git
+  cd SSAGES
+
+  3. Apply the Modern GROMACS Patch
+
+  # Copy the patch files to SSAGES directory
+  cp /path/to/patch/files/* .
+
+  # Run the installer (this applies the patch)
+  ./install-modern-gromacs-support.sh
+
+  4. Build SSAGES with Modern GROMACS
+
+  mkdir build && cd build
+  cmake .. -DGROMACS=ON -DUSE_EXTERNAL_GROMACS=ON -DGROMACS_ROOT=/path/to/gromacs
+  make -j$(nproc)
