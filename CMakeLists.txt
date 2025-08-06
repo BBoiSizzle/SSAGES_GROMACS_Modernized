@@ -131,8 +131,11 @@ else ()
     set_target_properties(libssages PROPERTIES COMPILE_FLAGS "-O3 -fPIC")
 endif ()
 
-# Require C++11.
-set_property(TARGET libssages PROPERTY CXX_STANDARD 11)
+# Set C++ standard - default to C++11 but allow override for modern GROMACS
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 11)
+endif()
+set_property(TARGET libssages PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
 set_property(TARGET libssages PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Dependencies
@@ -152,6 +155,10 @@ target_link_libraries(ssages
     ${ENGINE_LIBRARIES}
 )
 
+# Set C++ standard for ssages executable
+set_property(TARGET ssages PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
+set_property(TARGET ssages PROPERTY CXX_STANDARD_REQUIRED ON)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set_target_properties(ssages PROPERTIES COMPILE_FLAGS "-Wall -Wextra -g")
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
@@ -165,7 +172,7 @@ endif ()
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
 endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 if (SSAGES_PERF)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -march=native")
