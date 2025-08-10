@@ -1,5 +1,4 @@
-/**
- * This file is part of
+* This file is part of
  * SSAGES - Software Suite for Advanced General Ensemble Simulations
  *
  * Copyright 2017 Hythem Sidky <hsidky@nd.edu>
@@ -26,6 +25,9 @@
 #include "ForwardFlux.h"
 #include "Meta.h"
 #include "StringMethod.h"
+#ifdef SSAGES_GPU_ENABLED
+#include "UmbrellaGPU.h"
+#endif
 #include "schema.h"
 #include "json/json.h"
 #include "Drivers/DriverException.h"
@@ -71,6 +73,10 @@ namespace SSAGES
 			method = Meta::Build(json, world, comm, path);
 		else if(json["type"] == "Umbrella")
 			method = Umbrella::Build(json, world, comm, path);
+#ifdef SSAGES_GPU_ENABLED
+		else if(json["type"] == "UmbrellaGPUAccelerated")
+			method = UmbrellaGPUAccelerated::Build(json, world, comm, path);
+#endif
 		else if(json["type"] == "String")
 			method = StringMethod::Build(json, world, comm, path);
 		else
