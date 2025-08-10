@@ -1,0 +1,42 @@
+{
+    "schema": "http://ssagesproject.github.io/ssages/schemas/schema.json",
+    
+    "walkers": 1,
+    
+    "input": [
+        {
+            "walker": 0,
+            "args": "-s benchmark.tpr -deffnm gpu_benchmark -nsteps 10000"
+        }
+    ],
+    
+    "CVs": [
+        {
+            "type": "ParticleSeparation",
+            "name": "distance",
+            "group1": [1, 2, 3, 4, 5],
+            "group2": [10, 11, 12, 13, 14],
+            "fixx": true,
+            "fixy": true,
+            "fixz": true
+        }
+    ],
+    
+    "methods": [
+        {
+            "type": "UmbrellaGPUAccelerated",
+            "ksprings": [500.0],
+            "centers": [2.5], 
+            "output_file": "gpu_benchmark.dat",
+            "frequency": 1,
+            "output_frequency": 100,
+            "use_gpu": true,
+            "append": false
+        }
+    ],
+    
+    "logger": {
+        "frequency": 1000,
+        "file": "gpu_benchmark.log"
+    }
+}
