@@ -65,63 +65,63 @@ namespace SSAGES
 	 *
 	 * \ingroup Methods
 	 */
-	class Meta : public Method
-	{
-	private:	
-		//! Hills.
-		std::vector<Hill> hills_;
+        class Meta : public Method
+        {
+        protected:
+                //! Hills.
+                std::vector<Hill> hills_;
 
-		//! Hill height.
-		double height_;
+                //! Hill height.
+                double height_;
 
-		//! Hill widths.
-		std::vector<double> widths_;
+                //! Hill widths.
+                std::vector<double> widths_;
 
-		//!@{
-		//! Derivatives and temporary storage vectors.
-		std::vector<double> derivatives_, tder_, dx_;
-		//!@}
+                //!@{
+                //! Derivatives and temporary storage vectors.
+                std::vector<double> derivatives_, tder_, dx_;
+                //!@}
 
-		//! Frequency of new hills
-		unsigned int hillfreq_;
+                //! Frequency of new hills
+                unsigned int hillfreq_;
 
-		//! CV Grid. 
-		Grid<Vector>* grid_;
+                //! CV Grid.
+                Grid<Vector>* grid_;
 
-		//!@{
-		//! Bounds 
-		std::vector<double> upperb_, lowerb_;
-		//!@}
+                //!@{
+                //! Bounds
+                std::vector<double> upperb_, lowerb_;
+                //!@}
 
-		//!@{
-		//! Bound restraints. 
-		std::vector<double> upperk_, lowerk_;
-		//!@}
+                //!@{
+                //! Bound restraints.
+                std::vector<double> upperk_, lowerk_;
+                //!@}
 
-		//! Adds a new hill.
-		/*!
-		 * \param cvs List of CVs.
-		 * \param iteration Current iteration.
-		 */
-		void AddHill(const CVList& cvs, int iteration);
+                //! Adds a new hill.
+                /*!
+                 * \param cvs List of CVs.
+                 * \param iteration Current iteration.
+                 */
+                void AddHill(const CVList& cvs, int iteration);
 
-		//! Computes the bias force.
-		/*!
-		 * \param cvs List of CVs.
-		 */
-		void CalcBiasForce(const CVList& cvs);
+                //! Computes the bias force.
+                /*!
+                 * \param cvs List of CVs.
+                 */
+                virtual void CalcBiasForce(const CVList& cvs);
 
-		//! Prints the new hill to file
-		/*!
-		 * \param hill Hill to be printed.
-		 * \param iteration Current iteration.
-		 */
-		void PrintHill(const Hill& hill, int iteration);
+                //! Prints the new hill to file
+                /*!
+                 * \param hill Hill to be printed.
+                 * \param iteration Current iteration.
+                 */
+                void PrintHill(const Hill& hill, int iteration);
 
-		//! Output stream for hill data.
-		std::ofstream hillsout_;
+                //! Output stream for hill data.
+                std::ofstream hillsout_;
 
-	public:
+        public:
 		//! Constructor
 		/*!
 		 * \param world MPI global communicator.

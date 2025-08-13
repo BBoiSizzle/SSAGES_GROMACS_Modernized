@@ -27,6 +27,7 @@
 #include "StringMethod.h"
 #ifdef SSAGES_GPU_ENABLED
 #include "UmbrellaGPU.h"
+#include "MetaGPU.h"
 #endif
 #include "schema.h"
 #include "json/json.h"
@@ -69,16 +70,18 @@ namespace SSAGES
 			method = CFF::Build(json, world, comm, path);
 		else if(json["type"] == "ForwardFlux")
 			method = ForwardFlux::Build(json, world, comm, path);
-		else if(json["type"] == "Metadynamics")
-			method = Meta::Build(json, world, comm, path);
-		else if(json["type"] == "Umbrella")
-			method = Umbrella::Build(json, world, comm, path);
+                else if(json["type"] == "Metadynamics")
+                        method = Meta::Build(json, world, comm, path);
+                else if(json["type"] == "Umbrella")
+                        method = Umbrella::Build(json, world, comm, path);
 #ifdef SSAGES_GPU_ENABLED
-		else if(json["type"] == "UmbrellaGPUAccelerated")
-			method = UmbrellaGPUAccelerated::Build(json, world, comm, path);
+                else if(json["type"] == "UmbrellaGPUAccelerated")
+                        method = UmbrellaGPUAccelerated::Build(json, world, comm, path);
+                else if(json["type"] == "MetadynamicsGPUAccelerated")
+                        method = MetaGPUAccelerated::Build(json, world, comm, path);
 #endif
-		else if(json["type"] == "String")
-			method = StringMethod::Build(json, world, comm, path);
+                else if(json["type"] == "String")
+                        method = StringMethod::Build(json, world, comm, path);
 		else
 			throw std::invalid_argument(path + ": Unknown method type specified.");
 

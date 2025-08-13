@@ -53,6 +53,12 @@ include_directories("${PROJECT_BINARY_DIR}")
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/schema/)
 add_definitions(${MPI_CXX_COMPILE_FLAGS})
 
+option(SSAGES_GPU_ENABLED "Enable GPU acceleration" OFF)
+if(SSAGES_GPU_ENABLED)
+    enable_language(CUDA)
+    add_definitions(-DSSAGES_GPU_ENABLED)
+endif()
+
 # General source files
 set(SOURCE
     src/Methods/ABF.cpp
@@ -80,6 +86,10 @@ set(SOURCE
     src/ResourceHandler.cpp
     "include/nnet/nnet.cpp"
 )
+
+if(SSAGES_GPU_ENABLED)
+    list(APPEND SOURCE src/Methods/MetaGPU.cu)
+endif()
 
 ####################### MD ENGINES #########################
 
@@ -130,6 +140,11 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 else ()
     set_target_properties(libssages PROPERTIES COMPILE_FLAGS "-O3 -fPIC")
 endif ()
+
+if(SSAGES_GPU_ENABLED)
+    find_package(CUDA REQUIRED)
+    target_link_libraries(libssages ${CUDA_CUDART_LIBRARY})
+endif()
 
 # Set C++ standard - default to C++11 but allow override for modern GROMACS
 if(NOT DEFINED CMAKE_CXX_STANDARD)
